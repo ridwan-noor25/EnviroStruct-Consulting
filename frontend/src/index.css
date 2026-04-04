@@ -1,1 +1,27 @@
 @import "tailwindcss";
+/* Leaf Green Color Palette - Environmental Theme */
+.text-leaf-green {
+  color: #4CAF50;  /* Fresh leaf green - for company name and active links */
+}
+
+.border-leaf-green {
+  border-color: #4CAF50;
+}
+
+.hover\:text-leaf-green:hover {
+  color: #4CAF50;
+}
+
+.bg-leaf-green-light {
+  background-color: #E8F5E9;  /* Very light green for dropdown hover */
+}
+
+.focus\:ring-leaf-green:focus {
+  --tw-ring-color: #4CAF50;
+}
+
+/* Optional: Make the company name stand out more */
+.text-leaf-green {
+  color: #4CAF50;
+  text-shadow: 0 0 5px rgba(76, 175, 80, 0.2);
+}
