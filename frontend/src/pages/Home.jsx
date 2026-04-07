@@ -84,23 +84,6 @@ const Home = () => {
     { icon: TrendingUp, title: "Sustainability & Risk Management", description: "Climate risk screening and ESG integration." }
   ];
 
-  // All services (for the full list)
-  const allServices = [
-    { icon: Leaf, title: "Environmental and Social Impact Assessments", description: "Comprehensive ESIA studies ensuring regulatory compliance and responsible development." },
-    { icon: ClipboardCheck, title: "Environmental Audits", description: "Systematic evaluation of environmental performance and regulatory compliance." },
-    { icon: FileText, title: "Strategic Environmental and Social Assessments", description: "High-level assessments for policies, plans, and programs." },
-    { icon: Settings, title: "Environmental and Social Management Systems", description: "Development of structured management systems for risk management." },
-    { icon: HomeIcon, title: "Resettlement Action Plans", description: "Fair and transparent resettlement processes with livelihood restoration." },
-    { icon: Shield, title: "Occupational Health and Safety Advisory", description: "Workplace safety assessments and compliance programs." },
-    { icon: TrendingUp, title: "Sustainability and Environmental Risk Management", description: "Climate risk screening, ESG integration, and sustainability advisory." },
-    { icon: HardHat, title: "Engineering and Pre-Design Studies", description: "Feasibility studies, engineering designs, and technical assessments." },
-    { icon: Briefcase, title: "Project Management Services", description: "Comprehensive project planning, supervision, and monitoring." },
-    { icon: Building2, title: "Business and Organizational Advisory", description: "Strategic planning and operational efficiency improvement." },
-    { icon: LineChart, title: "Financial Advisory Services", description: "Financial planning, investment analysis, and due diligence." },
-    { icon: Computer, title: "IT and Digital Solutions", description: "Digital transformation, cybersecurity, and data analytics." },
-    { icon: GraduationCap, title: "Training and Capacity Development", description: "Professional training and institutional capacity building." }
-  ];
-
   // Target clients data
   const targetClients = [
     { icon: Landmark, title: "Government & Public Institutions", description: "National and county governments, regulatory agencies" },
@@ -158,6 +141,16 @@ const Home = () => {
     { icon: Handshake, title: "Long-term Partnerships", description: "Committed to building lasting client relationships" }
   ];
 
+  // Partners and Collaborators
+  const partners = [
+    { name: "United Nations Development Programme", logo: "https://via.placeholder.com/120x60?text=UNDP", sector: "Development" },
+    { name: "World Bank", logo: "https://via.placeholder.com/120x60?text=World+Bank", sector: "Development" },
+    { name: "Kenya National Highways Authority", logo: "https://via.placeholder.com/120x60?text=KeNHA", sector: "Government" },
+    { name: "Rural Electrification Authority", logo: "https://via.placeholder.com/120x60?text=REA", sector: "Government" },
+    { name: "Ewaso Nyiro North Development Authority", logo: "https://via.placeholder.com/120x60?text=ENNDA", sector: "Development" },
+    { name: "Nairobi City County", logo: "https://via.placeholder.com/120x60?text=Nairobi+County", sector: "Government" }
+  ];
+
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section */}
@@ -178,9 +171,9 @@ const Home = () => {
 
         <div className="container mx-auto px-4 md:px-6 relative z-10">
           <div className="max-w-3xl">
-            <div className="inline-flex items-center bg-[#6E8F3D]/20 backdrop-blur-sm rounded-full px-5 py-2 mb-6 border border-[#6E8F3D]/30">
+            {/* <div className="inline-flex items-center bg-[#6E8F3D]/20 backdrop-blur-sm rounded-full px-5 py-2 mb-6 border border-[#6E8F3D]/30">
               <span className="text-[#6E8F3D] text-sm font-semibold tracking-wide">✦ Since 2017</span>
-            </div>
+            </div> */}
             <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight">
               Building a <span className="text-[#6E8F3D]">Sustainable</span> Future Together
             </h1>
@@ -214,14 +207,14 @@ const Home = () => {
           </div>
         </div>
         
-        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
+        {/* <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
           <div className="w-6 h-10 border-2 border-white rounded-full flex justify-center">
             <div className="w-1 h-2 bg-white rounded-full mt-2 animate-pulse"></div>
           </div>
-        </div>
+        </div> */}
       </section>
 
-     {/* Company Introduction */}
+      {/* Company Introduction */}
       <section className="py-24 bg-white">
         <div className="container mx-auto px-4 md:px-6">
           <div className="max-w-4xl mx-auto text-center">
@@ -472,6 +465,8 @@ const Home = () => {
         </div>
       </section>
 
+     
+
       {/* Call to Action */}
       <section className="py-24 relative overflow-hidden">
         <div className="absolute inset-0">
@@ -501,69 +496,42 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Contact Section */}
+
+       {/* Partners & Collaborators Section */}
       <section className="py-24 bg-white">
         <div className="container mx-auto px-4 md:px-6">
-          <div className="grid lg:grid-cols-2 gap-12">
-            <div>
-              <span className="text-[#6E8F3D] font-semibold text-sm uppercase tracking-wider">Get In Touch</span>
-              <h2 className="text-4xl font-bold text-[#0F3A5A] mt-3 mb-6">
-                Let's Discuss Your Project
-              </h2>
-              <div className="w-20 h-1 bg-[#6E8F3D] mb-8"></div>
-              <p className="text-gray-600 text-lg mb-8 leading-relaxed">
-                Ready to start your next project? Contact us for reliable environmental, social, and engineering consulting services.
-              </p>
-              <div className="space-y-5">
-                <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl hover:shadow-md transition">
-                  <div className="w-12 h-12 bg-[#6E8F3D]/10 rounded-full flex items-center justify-center">
-                    <MapPin className="h-6 w-6 text-[#6E8F3D]" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-500">Visit Us</p>
-                    <p className="font-semibold text-[#0F3A5A]">Nairobi, Kenya</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl hover:shadow-md transition">
-                  <div className="w-12 h-12 bg-[#6E8F3D]/10 rounded-full flex items-center justify-center">
-                    <Phone className="h-6 w-6 text-[#6E8F3D]" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-500">Call Us</p>
-                    <p className="font-semibold text-[#0F3A5A]">+254 (0) 700 000 000</p>
+          <div className="text-center max-w-3xl mx-auto mb-16">
+            <span className="text-[#6E8F3D] font-semibold text-sm uppercase tracking-wider">Our Network</span>
+            <h2 className="text-4xl md:text-5xl font-bold text-[#0F3A5A] mt-3 mb-4">
+              Partners & Collaborators
+            </h2>
+            <div className="w-20 h-1 bg-[#6E8F3D] mx-auto mb-6"></div>
+            <p className="text-gray-600">
+              We work closely with leading organizations to deliver sustainable solutions across Kenya and beyond
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 mb-12">
+            {partners.map((partner, index) => (
+              <div key={index} className="bg-gray-50 rounded-xl p-4 text-center hover:shadow-lg transition-all duration-300 group">
+                <div className="w-20 h-20 mx-auto mb-3 flex items-center justify-center">
+                  <div className="w-full h-full bg-gradient-to-br from-[#6E8F3D]/10 to-[#0F3A5A]/10 rounded-full flex items-center justify-center group-hover:scale-110 transition">
+                    <Handshake className="h-10 w-10 text-[#6E8F3D]" />
                   </div>
                 </div>
-                <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl hover:shadow-md transition">
-                  <div className="w-12 h-12 bg-[#6E8F3D]/10 rounded-full flex items-center justify-center">
-                    <Mail className="h-6 w-6 text-[#6E8F3D]" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-500">Email Us</p>
-                    <p className="font-semibold text-[#0F3A5A]">info@envirostruct.co.ke</p>
-                  </div>
-                </div>
+                <h3 className="text-sm font-semibold text-[#0F3A5A] mb-1">{partner.name}</h3>
+                <p className="text-xs text-gray-500">{partner.sector}</p>
               </div>
-            </div>
-            <div className="bg-gray-50 rounded-2xl shadow-xl p-8">
-              <h3 className="text-2xl font-bold text-[#0F3A5A] mb-6">Send us a message</h3>
-              <form className="space-y-5" onSubmit={(e) => e.preventDefault()}>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Your Name</label>
-                  <input type="text" placeholder="John Doe" className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-white focus:border-[#6E8F3D] focus:ring-2 focus:ring-[#6E8F3D]/20 outline-none transition" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
-                  <input type="email" placeholder="john@example.com" className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-white focus:border-[#6E8F3D] focus:ring-2 focus:ring-[#6E8F3D]/20 outline-none transition" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Your Message</label>
-                  <textarea rows="5" placeholder="Tell us about your project..." className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-white focus:border-[#6E8F3D] focus:ring-2 focus:ring-[#6E8F3D]/20 outline-none transition"></textarea>
-                </div>
-                <button type="submit" className="w-full bg-[#6E8F3D] text-white py-3 rounded-lg hover:bg-[#5a7a32] transition-all duration-300 font-semibold shadow-lg transform hover:-translate-y-0.5">
-                  Send Message
-                </button>
-              </form>
-            </div>
+            ))}
+          </div>
+
+          <div className="text-center">
+            <Link 
+              to="/contact" 
+              className="inline-flex items-center gap-2 bg-[#6E8F3D] text-white px-8 py-3 rounded-lg hover:bg-[#5a7a32] transition-all duration-300 shadow-lg"
+            >
+              Become a Partner <Handshake className="h-5 w-5" />
+            </Link>
           </div>
         </div>
       </section>
