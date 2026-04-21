@@ -15,159 +15,132 @@ import {
   Users,
   Leaf,
   HardHat,
-  Award,
-  Star,
   Building2,
-  ArrowRight
+  ArrowRight,
+  Loader
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+
+const API_URL = 'http://127.0.0.1:5000/api';
 
 const Portfolio = () => {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedProject, setSelectedProject] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [projects, setProjects] = useState([]);
+  const [categories, setCategories] = useState(['All']);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [stats, setStats] = useState({ total: 0, completed: 0, ongoing: 0 });
   const projectsPerPage = 6;
 
-  // Projects Data
-  const projects = [
-    {
-      id: 1,
-      title: "Gypsum Powder Processing Plant ESIA",
-      client: "Mahad Gypsum Ltd",
-      location: "Bulla Dagah, Garissa County, Kenya",
-      year: "2025",
-      status: "Completed",
-      category: "Industrial",
-      description: "Comprehensive Environmental and Social Impact Assessment (ESIA) and Environmental and Social Management Plan (ESMP) for a gypsum powder processing plant. The project included baseline studies, stakeholder consultations, impact analysis, and development of mitigation measures to ensure regulatory compliance and sustainable operations.",
-      image: "https://images.unsplash.com/photo-1581091226033-d5c48150dbaa?w=600&h=400&fit=crop",
-      icon: Factory,
-      keyFindings: "Identified key environmental risks including air quality, noise pollution, and waste management. Developed comprehensive mitigation strategies.",
-      outcomes: "Successfully obtained NEMA license. Project implemented with full regulatory compliance."
-    },
-    {
-      id: 2,
-      title: "17 Water Pans ESIA & Monitoring",
-      client: "Ewaso Nyiro North Development Authority (ENNDA)",
-      location: "Northern Kenya",
-      year: "2025",
-      status: "Completed",
-      category: "Water Resources",
-      description: "Environmental and Social Impact Assessment and monitoring for seventeen (17) water pans in arid and semi-arid regions of Northern Kenya. The project involved baseline environmental assessments, stakeholder engagement, and development of Environmental and Social Management Plans (ESMPs).",
-      image: "https://images.unsplash.com/photo-1581092335270-8b0b0c3f2f1e?w=600&h=400&fit=crop",
-      icon: Droplets,
-      keyFindings: "Assessed water quality, ecosystem impact, and community water access. Developed sustainable water management plans.",
-      outcomes: "Enhanced water access for 50+ communities. Improved drought resilience in the region."
-    },
-    {
-      id: 3,
-      title: "Artisanal Gold Mining ESIA",
-      client: "Hamakosi & Hilltop Cooperative Societies",
-      location: "Marsabit County, Kenya",
-      year: "2024",
-      status: "Completed",
-      category: "Mining",
-      description: "Environmental and Social Impact Assessment for artisanal gold mining projects in Marsabit County. The project included comprehensive environmental baseline studies, socio-economic surveys, stakeholder consultations, and development of mitigation measures for responsible mining practices.",
-      image: "https://images.unsplash.com/photo-1581092335270-8b0b0c3f2f1e?w=600&h=400&fit=crop",
-      icon: TrendingUp,
-      keyFindings: "Identified mercury contamination risks, habitat disruption, and community health concerns. Developed safer mining practices.",
-      outcomes: "Implemented safer mining techniques. Improved community awareness on environmental protection."
-    },
-    {
-      id: 4,
-      title: "Community Water Supply Projects ESIA",
-      client: "Development Partners & County Government",
-      location: "Various Counties, Kenya",
-      year: "2024",
-      status: "Completed",
-      category: "Water Resources",
-      description: "Environmental and Social Assessment for multiple community water supply projects across different counties. The projects focused on improving access to clean water while ensuring environmental sustainability and social inclusivity.",
-      image: "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=600&h=400&fit=crop",
-      icon: Droplets,
-      keyFindings: "Assessed water source sustainability, community impact, and environmental safeguards.",
-      outcomes: "Improved water access for 100,000+ community members. Sustainable water management systems established."
-    },
-    {
-      id: 5,
-      title: "Deqsane Mining Co. Gypsum ESIA",
-      client: "Deqsane Mining Co. Ltd",
-      location: "Garissa County, Kenya",
-      year: "2024",
-      status: "Completed",
-      category: "Mining",
-      description: "Environmental and Social Impact Assessment for gypsum mining operations in Garissa County. The project included comprehensive environmental studies, community engagement, and development of sustainable mining practices.",
-      image: "https://images.unsplash.com/photo-1581091226033-d5c48150dbaa?w=600&h=400&fit=crop",
-      icon: Factory,
-      keyFindings: "Evaluated mining impacts on local ecosystems, air quality, and community livelihoods.",
-      outcomes: "Sustainable mining framework implemented. Community compensation plan established."
-    },
-    {
-      id: 6,
-      title: "Infrastructure Development ESIA",
-      client: "Kenya National Highways Authority",
-      location: "Multiple Locations, Kenya",
-      year: "2023",
-      status: "Completed",
-      category: "Infrastructure",
-      description: "Environmental and Social Impact Assessment for major road infrastructure projects, including baseline studies, resettlement action plans, and environmental management planning.",
-      image: "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=600&h=400&fit=crop",
-      icon: HardHat,
-      keyFindings: "Assessed displacement impacts, noise pollution, and ecosystem fragmentation.",
-      outcomes: "Resettlement action plans implemented. Environmental mitigation measures in place."
-    },
-    {
-      id: 7,
-      title: "Renewable Energy Project ESIA",
-      client: "Rural Electrification Authority",
-      location: "Eastern Region, Kenya",
-      year: "2023",
-      status: "Ongoing",
-      category: "Energy",
-      description: "Environmental and Social Impact Assessment for solar and wind energy projects, focusing on land use, biodiversity, and community benefits.",
-      image: "https://images.unsplash.com/photo-1581092335270-8b0b0c3f2f1e?w=600&h=400&fit=crop",
-      icon: Leaf,
-      keyFindings: "Evaluated land use conflicts, bird migration patterns, and community benefit sharing.",
-      outcomes: "Renewable energy projects advancing with community support and environmental safeguards."
-    },
-    {
-      id: 8,
-      title: "Agricultural Development ESIA",
-      client: "Ministry of Agriculture",
-      location: "Rift Valley, Kenya",
-      year: "2023",
-      status: "Completed",
-      category: "Agriculture",
-      description: "Strategic Environmental Assessment for large-scale agricultural development projects, including irrigation schemes and crop expansion programs.",
-      image: "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=600&h=400&fit=crop",
-      icon: TrendingUp,
-      keyFindings: "Assessed water usage impacts, soil degradation risks, and biodiversity loss.",
-      outcomes: "Sustainable agricultural practices adopted. Water conservation measures implemented."
-    },
-    {
-      id: 9,
-      title: "Urban Development Environmental Audit",
-      client: "Nairobi City County",
-      location: "Nairobi, Kenya",
-      year: "2022",
-      status: "Completed",
-      category: "Urban Development",
-      description: "Comprehensive environmental audit for urban development projects, evaluating compliance with environmental regulations and identifying areas for improvement.",
-      image: "https://images.unsplash.com/photo-1581092335270-8b0b0c3f2f1e?w=600&h=400&fit=crop",
-      icon: Building2,
-      keyFindings: "Identified compliance gaps in waste management, air quality, and green spaces.",
-      outcomes: "Improved environmental compliance. Enhanced urban planning with green infrastructure."
-    }
-  ];
+  // Fetch projects from backend
+  useEffect(() => {
+    fetchProjects();
+    fetchCategories();
+    fetchStats();
+  }, []);
 
-  // Categories for filtering
-  const categories = ['All', 'Industrial', 'Water Resources', 'Mining', 'Infrastructure', 'Energy', 'Agriculture', 'Urban Development'];
+  const fetchProjects = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await fetch(`${API_URL}/projects`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      setProjects(data.projects || []);
+    } catch (error) {
+      console.error('Error fetching projects:', error);
+      setError('Failed to load projects. Please try again later.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchCategories = async () => {
+    try {
+      const response = await fetch(`${API_URL}/projects/categories`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      setCategories(data.categories || ['All']);
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+      setCategories(['All', 'Industrial', 'Water Resources', 'Mining', 'Infrastructure', 'Energy', 'Agriculture', 'Urban Development']);
+    }
+  };
+
+  const fetchStats = async () => {
+    try {
+      const response = await fetch(`${API_URL}/projects/stats`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      setStats({
+        total: data.total || projects.length,
+        completed: data.completed || 0,
+        ongoing: data.ongoing || 0
+      });
+    } catch (error) {
+      console.error('Error fetching stats:', error);
+      // Calculate stats from projects if API fails
+      const completedCount = projects.filter(p => p.status === 'Completed').length;
+      const ongoingCount = projects.filter(p => p.status === 'Ongoing').length;
+      setStats({
+        total: projects.length,
+        completed: completedCount,
+        ongoing: ongoingCount
+      });
+    }
+  };
+
+  // Icon mapping
+  const getIconComponent = (iconName) => {
+    const icons = {
+      Factory: Factory,
+      Droplets: Droplets,
+      TrendingUp: TrendingUp,
+      Users: Users,
+      Leaf: Leaf,
+      HardHat: HardHat,
+      Building2: Building2,
+      Briefcase: Briefcase
+    };
+    return icons[iconName] || Factory;
+  };
 
   // Filter projects based on category and search
   const filteredProjects = projects.filter(project => {
     const matchesCategory = selectedCategory === 'All' || project.category === selectedCategory;
-    const matchesSearch = project.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          project.client.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          project.location.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSearch = project.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          project.client?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          project.location?.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCategory && matchesSearch;
   });
 
@@ -183,6 +156,38 @@ const Portfolio = () => {
   const getStatusColor = (status) => {
     return status === 'Completed' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700';
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <Loader className="h-12 w-12 text-[#6E8F3D] animate-spin mx-auto mb-4" />
+          <p className="text-gray-600">Loading projects...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <p className="text-gray-600 mb-4">{error}</p>
+          <button
+            onClick={fetchProjects}
+            className="px-4 py-2 bg-[#6E8F3D] text-white rounded-lg hover:bg-[#5a7a2e] transition"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -211,7 +216,7 @@ const Portfolio = () => {
         <div className="container mx-auto px-4 md:px-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             <div>
-              <div className="text-3xl font-bold text-[#6E8F3D]">{projects.length}+</div>
+              <div className="text-3xl font-bold text-[#6E8F3D]">{stats.total}+</div>
               <p className="text-sm text-gray-600 mt-1">Projects Delivered</p>
             </div>
             <div>
@@ -279,7 +284,7 @@ const Portfolio = () => {
             <>
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {currentProjects.map((project) => {
-                  const Icon = project.icon;
+                  const Icon = getIconComponent(project.icon);
                   return (
                     <div
                       key={project.id}
@@ -292,6 +297,9 @@ const Portfolio = () => {
                           src={project.image}
                           alt={project.title}
                           className="w-full h-full object-cover group-hover:scale-110 transition duration-500"
+                          onError={(e) => {
+                            e.target.src = 'https://via.placeholder.com/600x400?text=No+Image';
+                          }}
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                         <div className="absolute top-4 right-4">
@@ -421,6 +429,9 @@ const Portfolio = () => {
                   src={selectedProject.image}
                   alt={selectedProject.title}
                   className="w-full h-80 object-cover rounded-xl mb-6"
+                  onError={(e) => {
+                    e.target.src = 'https://via.placeholder.com/800x400?text=Project+Image';
+                  }}
                 />
 
                 {/* Project Header */}
@@ -457,7 +468,7 @@ const Portfolio = () => {
                 </div>
 
                 {/* Key Findings */}
-                {selectedProject.keyFindings && (
+                {selectedProject.keyFindings && selectedProject.keyFindings !== '' && (
                   <div className="mb-6">
                     <h4 className="text-lg font-bold text-[#0F3A5A] mb-3">Key Findings</h4>
                     <p className="text-gray-600 leading-relaxed">{selectedProject.keyFindings}</p>
@@ -465,7 +476,7 @@ const Portfolio = () => {
                 )}
 
                 {/* Outcomes */}
-                {selectedProject.outcomes && (
+                {selectedProject.outcomes && selectedProject.outcomes !== '' && (
                   <div className="mb-6">
                     <h4 className="text-lg font-bold text-[#0F3A5A] mb-3">Project Outcomes</h4>
                     <p className="text-gray-600 leading-relaxed">{selectedProject.outcomes}</p>

@@ -23,6 +23,8 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
+const API_URL = 'http://127.0.0.1:5000/api';
+
 const Contact = () => {
   const [scrolled, setScrolled] = useState(false);
   const [formData, setFormData] = useState({
@@ -56,19 +58,36 @@ const Contact = () => {
     setIsSubmitting(true);
     setSubmitError('');
     
-    // Simulate form submission (replace with actual API call)
-    setTimeout(() => {
-      setIsSubmitting(false);
-      setSubmitSuccess(true);
-      setFormData({
-        fullName: '',
-        email: '',
-        organization: '',
-        subject: '',
-        message: ''
+    try {
+      const response = await fetch(`${API_URL}/contacts`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData)
       });
-      setTimeout(() => setSubmitSuccess(false), 5000);
-    }, 1500);
+      
+      const data = await response.json();
+      
+      if (response.ok) {
+        setSubmitSuccess(true);
+        setFormData({
+          fullName: '',
+          email: '',
+          organization: '',
+          subject: '',
+          message: ''
+        });
+        setTimeout(() => setSubmitSuccess(false), 5000);
+      } else {
+        setSubmitError(data.error || 'Failed to send message. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error sending message:', error);
+      setSubmitError('Network error. Please check your connection and try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // Services list

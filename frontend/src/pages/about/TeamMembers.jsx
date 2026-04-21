@@ -1,144 +1,125 @@
-// pages/about/TeamMembers.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+
+const API_URL = 'http://127.0.0.1:5000/api';
 
 const TeamMembers = () => {
   const [selectedMember, setSelectedMember] = useState(null);
   const [filter, setFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
+  const [teamMembers, setTeamMembers] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const teamMembers = [
-    {
-      id: 1,
-      name: 'Ibrahim Mohamed Aden',
-      position: 'Managing Consultant / Lead Expert',
-      shortExpertise: 'Environmental & Social Safeguards',
-      coreExpertise: 'Environmental and Social Safeguards Instruments (ESIA, ESMP, RAP, SEP, LMP, SMP, ESMS ESG), safeguards compliance, climate risk management',
-      qualifications: 'PGCert Sustainability Leadership for the Built Environment – University of Cambridge (UK); MSc Environmental & Business Management – Bangor University (UK); BSc Environmental Studies – Kenyatta University (Kenya)',
-      experience: '9+ Years',
-      email: 'ibrahim.aden@envirostruct.net',
-      phone: '+254 XXX XXX XXX',
-      location: 'Nairobi, Kenya',
-      category: 'leadership',
-      certifications: ['ESIA Expert', 'Climate Risk Management', 'ESG Specialist', 'Safeguards Compliance']
-    },
-    {
-      id: 2,
-      name: 'Yasmin Daud Noor',
-      position: 'Associate Expert – Environmental & Social Safeguards',
-      shortExpertise: 'Environmental assessments & climate resilience',
-      coreExpertise: 'Environmental assessments, climate resilience programs, stakeholder consultations, ESMP monitoring',
-      qualifications: 'BSc Environmental Studies (Community Development) – Kenyatta University (Kenya)',
-      experience: '6+ Years',
-      email: 'yasmin.noor@envirostruct.net',
-      phone: '+254 XXX XXX XXX',
-      location: 'Nairobi, Kenya',
-      category: 'environmental',
-      certifications: ['Environmental Auditor', 'Climate Resilience Specialist', 'Stakeholder Engagement']
-    },
-    {
-      id: 3,
-      name: 'Isnino Mohamed Ibrahim',
-      position: 'Social Development Consultant',
-      shortExpertise: 'Social impact & community engagement',
-      coreExpertise: 'Social impact assessments, community consultations, grievance redress mechanisms',
-      qualifications: 'BA Sociology, Psychology & Conflict and Peace Studies – University of Nairobi (Kenya)',
-      experience: '5+ Years',
-      email: 'isnino.ibrahim@envirostruct.net',
-      phone: '+254 XXX XXX XXX',
-      location: 'Nairobi, Kenya',
-      category: 'social',
-      certifications: ['Social Safeguards Specialist', 'Community Engagement Expert', 'Grievance Mechanism']
-    },
-    {
-      id: 4,
-      name: 'Eng. Abdirahim Ibrahim Mohamed',
-      position: 'Senior Civil Engineer / Infrastructure Specialist',
-      shortExpertise: 'Infrastructure design & supervision',
-      coreExpertise: 'Infrastructure design, roads, WASH systems, drainage, construction supervision',
-      qualifications: 'BSc Civil Engineering – University of Nairobi (Kenya); Registered Professional Engineer – Engineers Board of Kenya (EBK)',
-      experience: '12+ Years',
-      email: 'abdirahim.mohamed@envirostruct.net',
-      phone: '+254 XXX XXX XXX',
-      location: 'Nairobi, Kenya',
-      category: 'engineering',
-      certifications: ['Registered Engineer EBK', 'Infrastructure Design Expert', 'Construction Supervision']
-    },
-    {
-      id: 5,
-      name: 'Salim Said Abdalla',
-      position: 'Planner / GIS & Land Use Specialist',
-      shortExpertise: 'GIS analysis & spatial planning',
-      coreExpertise: 'GIS analysis, spatial planning, land administration, environmental mapping',
-      qualifications: 'BSc Urban & Regional Planning with IT – Maseno University (Kenya)',
-      experience: '5+ Years',
-      email: 'salim.abdalla@envirostruct.net',
-      phone: '+254 XXX XXX XXX',
-      location: 'Nairobi, Kenya',
-      category: 'technical',
-      certifications: ['GIS Professional', 'Land Use Planner', 'Spatial Analysis']
-    },
-    {
-      id: 6,
-      name: 'Fardowsa Hassan Bare',
-      position: 'Land Surveyor',
-      shortExpertise: 'Topographic & cadastral surveys',
-      coreExpertise: 'Topographic surveys, cadastral mapping, infrastructure surveys',
-      qualifications: 'B-Tech Land Surveying – Technical University of Kenya (TUK); Diploma Land Surveying – Kenya Institute of Surveying and Mapping (KISM)',
-      experience: '5+ Years',
-      email: 'fardowsa.bare@envirostruct.net',
-      phone: '+254 XXX XXX XXX',
-      location: 'Nairobi, Kenya',
-      category: 'technical',
-      certifications: ['Licensed Surveyor', 'Cadastral Mapping Expert', 'Infrastructure Surveyor']
-    },
-    {
-      id: 7,
-      name: 'Muktar Abbey',
-      position: 'Water & Environmental Engineer',
-      shortExpertise: 'WASH & water systems design',
-      coreExpertise: 'WASH infrastructure, water systems design, safeguards monitoring',
-      qualifications: 'BSc Water & Environmental Engineering – Egerton University (Kenya)',
-      experience: '5+ Years',
-      email: 'muktar.abbey@envirostruct.net',
-      phone: '+254 XXX XXX XXX',
-      location: 'Nairobi, Kenya',
-      category: 'engineering',
-      certifications: ['Water Systems Designer', 'Environmental Engineer', 'WASH Specialist']
-    },
-    {
-      id: 8,
-      name: 'Naima Ibrahim',
-      position: 'Monitoring & Evaluation Specialist',
-      shortExpertise: 'M&E systems & data analytics',
-      coreExpertise: 'M&E systems, data analytics, impact assessments',
-      qualifications: 'BSc Economics & Statistics – Kenyatta University (Kenya); MSc Data Science – Strathmore University (Ongoing)',
-      experience: '5+ Years',
-      email: 'naima.ibrahim@envirostruct.net',
-      phone: '+254 XXX XXX XXX',
-      location: 'Nairobi, Kenya',
-      category: 'monitoring',
-      certifications: ['M&E Professional', 'Data Analytics Expert', 'Impact Assessment']
+  useEffect(() => {
+    fetchTeamMembers();
+    fetchCategories();
+  }, []);
+
+  const fetchTeamMembers = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const url = filter === 'all' 
+        ? `${API_URL}/team` 
+        : `${API_URL}/team?category=${filter}`;
+      
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      setTeamMembers(data.members || []);
+    } catch (error) {
+      console.error('Error fetching team members:', error);
+      setError('Failed to load team members. Please try again later.');
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
 
-  const categories = [
-    { id: 'all', label: 'All Team' },
-    { id: 'leadership', label: 'Leadership' },
-    { id: 'environmental', label: 'Environmental' },
-    { id: 'social', label: 'Social Development' },
-    { id: 'engineering', label: 'Engineering' },
-    { id: 'technical', label: 'Technical' },
-    { id: 'monitoring', label: 'Monitoring & Evaluation' }
-  ];
+  const fetchCategories = async () => {
+    try {
+      const response = await fetch(`${API_URL}/team/categories`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      setCategories(data.categories || []);
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+      // Default categories if API fails
+      setCategories([
+        { id: 'all', label: 'All Team' },
+        { id: 'leadership', label: 'Leadership' },
+        { id: 'environmental', label: 'Environmental' },
+        { id: 'social', label: 'Social Development' },
+        { id: 'engineering', label: 'Engineering' },
+        { id: 'technical', label: 'Technical' },
+        { id: 'monitoring', label: 'Monitoring & Evaluation' }
+      ]);
+    }
+  };
 
+  // Filter members by search term
   const filteredMembers = teamMembers.filter(member => {
-    const matchesFilter = filter === 'all' || member.category === filter;
     const matchesSearch = searchTerm === '' || 
       member.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       member.position.toLowerCase().includes(searchTerm.toLowerCase()) ||
       member.shortExpertise.toLowerCase().includes(searchTerm.toLowerCase());
-    return matchesFilter && matchesSearch;
+    return matchesSearch;
   });
+
+  // Refetch when filter changes
+  useEffect(() => {
+    fetchTeamMembers();
+  }, [filter]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-[#6E8F3D]/30 border-t-[#6E8F3D] rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading team members...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <p className="text-gray-600 mb-4">{error}</p>
+          <button
+            onClick={fetchTeamMembers}
+            className="px-4 py-2 bg-[#6E8F3D] text-white rounded-lg hover:bg-[#5a7a2e] transition"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white min-h-screen">
@@ -346,7 +327,7 @@ const TeamMembers = () => {
                     Certifications
                   </h3>
                   <div className="flex flex-wrap gap-2">
-                    {selectedMember.certifications.map((cert, idx) => (
+                    {selectedMember.certifications && selectedMember.certifications.map((cert, idx) => (
                       <span key={idx} className="px-3 py-1.5 bg-[#6E8F3D]/10 text-[#6E8F3D] text-sm rounded-lg">
                         {cert}
                       </span>
