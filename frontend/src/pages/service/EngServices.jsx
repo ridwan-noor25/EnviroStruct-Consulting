@@ -1,115 +1,117 @@
-// pages/service/EngServices.jsx
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
+const API_URL = 'http://127.0.0.1:5000/api';
+
 const EngServices = () => {
-  const services = [
-    {
-      title: 'Engineering and Pre-Design Studies',
-      description: 'Technical assessments and preliminary studies required for infrastructure and development projects.',
-      benefits: [
-        'Informed project planning',
-        'Risk identification early',
-        'Cost estimation',
-        'Technical feasibility'
-      ],
-      icon: (
-        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+  const [services, setServices] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Icon mapping - map icon names to SVG components
+  const getIconComponent = (iconName, className = "w-8 h-8") => {
+    const icons = {
+      'Ruler': (
+        <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
         </svg>
-      )
-    },
-    {
-      title: 'Feasibility Studies',
-      description: 'Comprehensive assessment of project viability including technical, economic, and financial analysis.',
-      benefits: [
-        'Investment decision support',
-        'Risk assessment',
-        'ROI analysis',
-        'Project viability confirmation'
-      ],
-      icon: (
-        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      ),
+      'TrendingUp': (
+        <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
         </svg>
-      )
-    },
-    {
-      title: 'Detailed Engineering Designs',
-      description: 'Comprehensive engineering designs and technical drawings for infrastructure projects.',
-      benefits: [
-        'Technical specifications',
-        'Construction-ready drawings',
-        'Material specifications',
-        'Quality assurance'
-      ],
-      icon: (
-        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      ),
+      'PenTool': (
+        <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
         </svg>
-      )
-    },
-    {
-      title: 'Topographic Surveys',
-      description: 'Detailed mapping and surveying services for infrastructure planning and design.',
-      benefits: [
-        'Accurate elevation data',
-        'Site mapping',
-        'Terrain analysis',
-        'Construction planning support'
-      ],
-      icon: (
-        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      ),
+      'Map': (
+        <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
         </svg>
-      )
-    },
-    {
-      title: 'Geotechnical Investigations',
-      description: 'Subsurface exploration and soil testing to inform foundation design and construction.',
-      benefits: [
-        'Soil property analysis',
-        'Foundation recommendations',
-        'Ground stability assessment',
-        'Construction risk mitigation'
-      ],
-      icon: (
-        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      ),
+      'Droplets': (
+        <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
         </svg>
-      )
-    },
-    {
-      title: 'Infrastructure Planning Assessments',
-      description: 'Strategic planning and assessment of infrastructure requirements and impacts.',
-      benefits: [
-        'Infrastructure gap analysis',
-        'Capacity planning',
-        'Environmental integration',
-        'Stakeholder alignment'
-      ],
-      icon: (
-        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      ),
+      'Building2': (
+        <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
         </svg>
-      )
-    },
-    {
-      title: 'Construction Supervision',
-      description: 'On-site supervision and quality control during construction phases.',
-      benefits: [
-        'Quality assurance',
-        'Safety compliance',
-        'Timeline management',
-        'Contractor coordination'
-      ],
-      icon: (
-        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      ),
+      'HardHat': (
+        <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
         </svg>
       )
+    };
+    
+    return icons[iconName] || icons['Ruler'];
+  };
+
+  useEffect(() => {
+    fetchEngineeringServices();
+  }, []);
+
+  const fetchEngineeringServices = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const response = await fetch(`${API_URL}/services?category=engineering`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      setServices(data.services || []);
+    } catch (error) {
+      console.error('Error fetching engineering services:', error);
+      setError('Failed to load services. Please try again later.');
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-[#6E8F3D]/30 border-t-[#6E8F3D] rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading engineering services...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <p className="text-gray-600 mb-4">{error}</p>
+          <button
+            onClick={fetchEngineeringServices}
+            className="px-4 py-2 bg-[#6E8F3D] text-white rounded-lg hover:bg-[#5a7a2e] transition"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white min-h-screen">
@@ -152,35 +154,41 @@ const EngServices = () => {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-8">
-            {services.map((service, index) => (
-              <div key={index} className="bg-white rounded-2xl border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300 group">
-                <div className="p-6">
-                  <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 bg-gradient-to-br from-[#0F3A5A] to-[#6E8F3D] rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
-                      <div className="text-white">
-                        {service.icon}
+          {services.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-gray-500">No engineering services available at the moment.</p>
+            </div>
+          ) : (
+            <div className="grid md:grid-cols-2 gap-8">
+              {services.map((service, index) => (
+                <div key={service.id} className="bg-white rounded-2xl border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300 group">
+                  <div className="p-6">
+                    <div className="flex items-start gap-4">
+                      <div className="w-12 h-12 bg-gradient-to-br from-[#0F3A5A] to-[#6E8F3D] rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
+                        <div className="text-white">
+                          {getIconComponent(service.icon, "w-6 h-6")}
+                        </div>
                       </div>
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="text-xl font-bold text-[#0F3A5A] mb-3">{service.title}</h3>
-                      <p className="text-gray-600 mb-4 leading-relaxed">{service.description}</p>
-                      <div className="grid grid-cols-2 gap-2">
-                        {service.benefits.map((benefit, idx) => (
-                          <div key={idx} className="flex items-center gap-2 text-sm text-gray-700">
-                            <svg className="h-3.5 w-3.5 text-[#6E8F3D]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-                            </svg>
-                            <span>{benefit}</span>
-                          </div>
-                        ))}
+                      <div className="flex-1">
+                        <h3 className="text-xl font-bold text-[#0F3A5A] mb-3">{service.title}</h3>
+                        <p className="text-gray-600 mb-4 leading-relaxed">{service.description}</p>
+                        <div className="grid grid-cols-2 gap-2">
+                          {service.benefits && service.benefits.map((benefit, idx) => (
+                            <div key={idx} className="flex items-center gap-2 text-sm text-gray-700">
+                              <svg className="h-3.5 w-3.5 text-[#6E8F3D]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                              </svg>
+                              <span>{benefit}</span>
+                            </div>
+                          ))}
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
