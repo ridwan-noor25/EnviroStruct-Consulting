@@ -13,7 +13,9 @@ import {
   Shield,
   User,
   Settings,
-  Bell
+  Bell,
+  Menu,
+  X
 } from 'lucide-react';
 
 const Sidebar = ({ isOpen, sidebarToggle }) => {
@@ -22,6 +24,8 @@ const Sidebar = ({ isOpen, sidebarToggle }) => {
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [adminUser, setAdminUser] = useState(null);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
   const adminNavItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, path: '/admin/dashboard' },
@@ -32,6 +36,18 @@ const Sidebar = ({ isOpen, sidebarToggle }) => {
     { id: 'analytics', label: 'Analytics', icon: BarChart3, path: '/admin/analytics' },
   ];
 
+  // Check if mobile screen
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   // Fetch admin user data from localStorage
   useEffect(() => {
     const userData = localStorage.getItem('adminUser');
@@ -40,11 +56,28 @@ const Sidebar = ({ isOpen, sidebarToggle }) => {
     }
   }, []);
 
+  // Close mobile sidebar when route changes
+  useEffect(() => {
+    setIsMobileOpen(false);
+  }, [location.pathname]);
+
+  // Handle body scroll lock
+  useEffect(() => {
+    if (isMobile && isMobileOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isMobile, isMobileOpen]);
+
   const handleLogout = async () => {
     setIsLoggingOut(true);
     
     try {
-      // Call backend logout API
       const response = await fetch('http://localhost:5000/api/admin/logout', {
         method: 'POST',
         headers: {
@@ -53,20 +86,15 @@ const Sidebar = ({ isOpen, sidebarToggle }) => {
         credentials: 'include',
       });
 
-      // Clear localStorage regardless of API response
       localStorage.removeItem('adminToken');
       localStorage.removeItem('adminUser');
       localStorage.removeItem('adminAuthenticated');
       
-      // Show success message
       alert('✅ Logged out successfully!');
-      
-      // Redirect to login page
       navigate('/admin-login');
       
     } catch (error) {
       console.error('Logout error:', error);
-      // Still clear local storage even if API fails
       localStorage.removeItem('adminToken');
       localStorage.removeItem('adminUser');
       localStorage.removeItem('adminAuthenticated');
@@ -75,6 +103,7 @@ const Sidebar = ({ isOpen, sidebarToggle }) => {
     } finally {
       setIsLoggingOut(false);
       setShowLogoutConfirm(false);
+      setIsMobileOpen(false);
     }
   };
 
@@ -82,12 +111,197 @@ const Sidebar = ({ isOpen, sidebarToggle }) => {
     return location.pathname === path;
   };
 
+  const handleNavClick = () => {
+    if (isMobile) {
+      setIsMobileOpen(false);
+    }
+  };
+
+  // Mobile Menu Button - Only show when sidebar is closed
+  const MobileMenuButton = () => (
+    !isMobileOpen && (
+      <button
+        onClick={() => setIsMobileOpen(true)}
+        className="md:hidden fixed top-4 left-4 z-50 p-2 rounded-lg bg-gray-900 text-white shadow-lg hover:bg-gray-800 transition-colors"
+        aria-label="Open menu"
+      >
+        <Menu size={24} />
+      </button>
+    )
+  );
+
+  // Determine if sidebar should be visible
+  const sidebarVisible = isMobile ? isMobileOpen : isOpen;
+
+  // Sidebar content component (reused for both desktop and mobile)
+  const SidebarContent = () => (
+    <>
+      {/* Logo Section */}
+      <div className="flex items-center justify-between p-5 border-b border-gray-700">
+        <Link 
+          to="/admin/dashboard" 
+          onClick={handleNavClick}
+          className={`flex items-center space-x-3 ${!isOpen && !isMobile && 'justify-center w-full'}`}
+        >
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden bg-white">
+            <img 
+              src="/src/assets/logo of Enviro.png"
+              alt="Envirostruct Logo" 
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                e.target.style.display = 'none';
+                e.target.parentElement.innerHTML = '<span class="font-bold text-xl text-emerald-600">EC</span>';
+              }}
+            />
+          </div>
+          {(isOpen || isMobile) && (
+            <div className="overflow-hidden">
+              <span className="font-semibold text-base block">Envirostruct</span>
+              <p className="text-xs text-gray-400">Admin Panel</p>
+            </div>
+          )}
+        </Link>
+      </div>
+
+      {/* Admin Navigation */}
+      <nav className="flex-1 px-3 py-4 space-y-2 overflow-y-auto sidebar-scroll">
+        {adminNavItems.map((item) => {
+          const Icon = item.icon;
+          const isActive = isNavActive(item.path);
+          return (
+            <Link
+              key={item.id}
+              to={item.path}
+              onClick={handleNavClick}
+              className={`
+                flex items-center space-x-3 px-4 py-3 rounded-xl
+                transition-all duration-200 group
+                ${isActive 
+                  ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg' 
+                  : 'text-gray-300 hover:bg-gray-700/50 hover:text-white'
+                }
+                ${!isOpen && !isMobile && 'justify-center'}
+              `}
+            >
+              <Icon size={20} className="flex-shrink-0" />
+              {(isOpen || isMobile) && <span className="text-sm font-medium">{item.label}</span>}
+              {!isOpen && !isMobile && (
+                <div className="absolute left-full ml-2 px-2 py-1 bg-gray-800 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50 shadow-lg">
+                  {item.label}
+                </div>
+              )}
+            </Link>
+          );
+        })}
+      </nav>
+
+      {/* Session Status Indicator */}
+      {(isOpen || isMobile) && (
+        <div className="px-4 py-2 mx-3 mb-2 bg-emerald-900/20 rounded-lg border border-emerald-700/30">
+          <div className="flex items-center justify-between">
+            <span className="text-xs text-gray-400">Session Status</span>
+            <span className="flex items-center gap-1 text-xs text-emerald-400">
+              <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></span>
+              Active
+            </span>
+          </div>
+        </div>
+      )}
+
+      {/* Admin Info (Mobile only) */}
+      {isMobile && adminUser && (
+        <div className="px-4 py-3 mx-3 mb-2 bg-gray-800/50 rounded-lg">
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 rounded-full bg-emerald-600 flex items-center justify-center">
+              <User size={20} className="text-white" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-white truncate">
+                {adminUser.name || adminUser.email}
+              </p>
+              <p className="text-xs text-gray-400 truncate">
+                {adminUser.email}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Logout Button */}
+      <div className="px-3 pb-3">
+        <button
+          onClick={() => setShowLogoutConfirm(true)}
+          className={`
+            w-full flex items-center space-x-3 px-4 py-3 rounded-xl
+            transition-all duration-200 group
+            ${(isOpen || isMobile)
+              ? 'bg-red-600/10 hover:bg-red-600/20 text-red-400 hover:text-red-300 border border-red-500/20' 
+              : 'justify-center text-gray-400 hover:text-red-400 hover:bg-red-600/20'
+            }
+          `}
+        >
+          <LogOut size={20} className="flex-shrink-0" />
+          {(isOpen || isMobile) && <span className="text-sm font-medium">Sign Out</span>}
+          {!isOpen && !isMobile && (
+            <div className="absolute left-full ml-2 px-2 py-1 bg-gray-800 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50 shadow-lg">
+              Sign Out
+            </div>
+          )}
+        </button>
+      </div>
+
+      {/* Divider */}
+      <div className="mx-4 h-px bg-gray-700"></div>
+
+      {/* Footer */}
+      {(isOpen || isMobile) && (
+        <div className="px-4 py-3 text-center">
+          <div className="flex items-center justify-center space-x-2 mb-1">
+            <Shield size={12} className="text-gray-500" />
+            <p className="text-[10px] text-gray-500">Secure Admin Area</p>
+          </div>
+          <p className="text-[9px] text-gray-600">
+            © 2026 Envirostruct Consulting
+          </p>
+        </div>
+      )}
+      
+      {!isOpen && !isMobile && (
+        <div className="p-2 text-center">
+          <Shield size={14} className="text-gray-500 mx-auto" />
+        </div>
+      )}
+    </>
+  );
+
   return (
     <>
+      {/* Mobile Menu Button - Only shows when sidebar is closed */}
+      <MobileMenuButton />
+
+      {/* Mobile Overlay */}
+      {isMobile && isMobileOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-30 md:hidden"
+          onClick={() => setIsMobileOpen(false)}
+        />
+      )}
+
+      {/* Close Button for Mobile Sidebar - Fixed position on the overlay */}
+      {isMobile && isMobileOpen && (
+        <button
+          onClick={() => setIsMobileOpen(false)}
+          className="md:hidden fixed top-4 left-[292px] z-50 p-2 rounded-lg bg-gray-800 text-white shadow-lg hover:bg-gray-700 transition-colors"
+          aria-label="Close menu"
+        >
+          <X size={24} />
+        </button>
+      )}
+
       {/* Logout Confirmation Modal */}
       {showLogoutConfirm && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl p-6 max-w-sm mx-4 shadow-2xl">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl p-6 max-w-sm w-full shadow-2xl">
             <div className="text-center">
               <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <LogOut size={28} className="text-red-600" />
@@ -96,17 +310,17 @@ const Sidebar = ({ isOpen, sidebarToggle }) => {
               <p className="text-gray-500 text-sm mb-6">
                 Are you sure you want to sign out from your admin account?
               </p>
-              <div className="flex gap-3">
+              <div className="flex flex-col sm:flex-row gap-3">
                 <button
                   onClick={() => setShowLogoutConfirm(false)}
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                  className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleLogout}
                   disabled={isLoggingOut}
-                  className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isLoggingOut ? 'Logging out...' : 'Logout'}
                 </button>
@@ -116,129 +330,28 @@ const Sidebar = ({ isOpen, sidebarToggle }) => {
         </div>
       )}
 
-      {/* Sidebar */}
+      {/* Sidebar - Desktop */}
       <div
         className={`
-          fixed left-0 top-0 h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900
+          hidden md:flex fixed left-0 top-0 h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900
           text-white transition-all duration-300 ease-in-out z-30
-          flex flex-col shadow-2xl
+          flex-col shadow-2xl
           ${isOpen ? 'w-64' : 'w-20'}
         `}
       >
-        {/* Logo Section with Toggle Button */}
-        <div className="flex items-center justify-between p-5 border-b border-gray-700">
-          <Link to="/admin/dashboard" className={`flex items-center space-x-3 ${!isOpen && 'justify-center w-full'}`}>
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden bg-white">
-              <img 
-                src="/src/assets/logo of Enviro.png"
-                alt="Envirostruct Logo" 
-                className="w-full h-full object-cover"
-                onError={(e) => {
-                  e.target.style.display = 'none';
-                  e.target.parentElement.innerHTML = '<span class="font-bold text-xl text-emerald-600">EC</span>';
-                }}
-              />
-            </div>
-            {isOpen && (
-              <div className="overflow-hidden">
-                <span className="font-semibold text-base block">Envirostruct</span>
-                <p className="text-xs text-gray-400">Admin Panel</p>
-              </div>
-            )}
-          </Link>
-          {/* Sidebar Toggle Button */}
-         
-        </div>
+        <SidebarContent />
+      </div>
 
-        
-        {/* Admin Navigation */}
-        <nav className="flex-1 px-3 py-4 space-y-2 overflow-y-auto sidebar-scroll">
-          {adminNavItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = isNavActive(item.path);
-            return (
-              <Link
-                key={item.id}
-                to={item.path}
-                className={`
-                  flex items-center space-x-3 px-4 py-3 rounded-xl
-                  transition-all duration-200 group
-                  ${isActive 
-                    ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg' 
-                    : 'text-gray-300 hover:bg-gray-700/50 hover:text-white'
-                  }
-                  ${!isOpen && 'justify-center'}
-                `}
-              >
-                <Icon size={20} className="flex-shrink-0" />
-                {isOpen && <span className="text-sm font-medium">{item.label}</span>}
-                {!isOpen && (
-                  <div className="absolute left-full ml-2 px-2 py-1 bg-gray-800 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50 shadow-lg">
-                    {item.label}
-                  </div>
-                )}
-              </Link>
-            );
-          })}
-        </nav>
-
-        {/* Session Status Indicator */}
-        {isOpen && (
-          <div className="px-4 py-2 mx-3 mb-2 bg-emerald-900/20 rounded-lg border border-emerald-700/30">
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-gray-400">Session Status</span>
-              <span className="flex items-center gap-1 text-xs text-emerald-400">
-                <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></span>
-                Active
-              </span>
-            </div>
-          </div>
-        )}
-
-        {/* Logout Button */}
-        <div className="px-3 pb-3">
-          <button
-            onClick={() => setShowLogoutConfirm(true)}
-            className={`
-              w-full flex items-center space-x-3 px-4 py-3 rounded-xl
-              transition-all duration-200 group
-              ${isOpen 
-                ? 'bg-red-600/10 hover:bg-red-600/20 text-red-400 hover:text-red-300 border border-red-500/20' 
-                : 'justify-center text-gray-400 hover:text-red-400 hover:bg-red-600/20'
-              }
-            `}
-          >
-            <LogOut size={20} className="flex-shrink-0" />
-            {isOpen && <span className="text-sm font-medium">Sign Out</span>}
-            {!isOpen && (
-              <div className="absolute left-full ml-2 px-2 py-1 bg-gray-800 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50 shadow-lg">
-                Sign Out
-              </div>
-            )}
-          </button>
-        </div>
-
-        {/* Divider */}
-        <div className="mx-4 h-px bg-gray-700"></div>
-
-        {/* Footer */}
-        {isOpen && (
-          <div className="px-4 py-3 text-center">
-            <div className="flex items-center justify-center space-x-2 mb-1">
-              <Shield size={12} className="text-gray-500" />
-              <p className="text-[10px] text-gray-500">Secure Admin Area</p>
-            </div>
-            <p className="text-[9px] text-gray-600">
-              © 2026 Envirostruct Consulting
-            </p>
-          </div>
-        )}
-        
-        {!isOpen && (
-          <div className="p-2 text-center">
-            <Shield size={14} className="text-gray-500 mx-auto" />
-          </div>
-        )}
+      {/* Sidebar - Mobile */}
+      <div
+        className={`
+          md:hidden fixed left-0 top-0 h-screen w-72 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900
+          text-white transition-transform duration-300 ease-in-out z-40
+          flex-col shadow-2xl
+          ${isMobileOpen ? 'translate-x-0' : '-translate-x-full'}
+        `}
+      >
+        <SidebarContent />
       </div>
 
       {/* Custom scrollbar styles */}
